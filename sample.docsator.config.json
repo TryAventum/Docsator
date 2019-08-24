@@ -1,0 +1,11 @@
+{
+  "replace": "__dirname",
+  "with": "",
+  "folder": "docs",
+  "tags": [
+    {
+      "tag": "hook",
+      "file": "hooks.md"
+    }
+  ]
+}

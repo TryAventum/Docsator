@@ -1,0 +1,30 @@
+{
+  "name": "@aventum/docsator",
+  "version": "1.0.0",
+  "description": "Docs generator for Aventum!",
+  "bin": {
+    "docsator": "./bin/docsator"
+  },
+  "author": {
+    "name": "Mohammed Al-Mahdawi",
+    "email": "mohammed@al-mahdawi.com",
+    "url": "https://al-mahdawi.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aventum-org/Docsator"
+  },
+  "keywords": [
+    "docsator",
+    "docs generator",
+    "JSDoc"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^3.0.0",
+    "comment-parser": "^0.6.2",
+    "fs-extra": "^8.1.0",
+    "klaw": "^3.0.0",
+    "through2": "^3.0.1"
+  }
+}

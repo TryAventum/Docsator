@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+const fs = require('fs')
+const fse = require('fs-extra')
+const path = require('path')
+const parse = require('comment-parser')
+const klaw = require('klaw')
+const through2 = require('through2')
+const program = require('commander')
+
+const { formater } = require('../helpers')
+
+program.version('1.0.0').description('Docs generator for Aventum!')
+
+program.option('-c, --cwd <arg1>', 'as if you run the command in this path')
+
+program.parse(process.argv)
+
+var cwd = program.cwd || process.cwd()
+
+var config = require(path.join(cwd, 'docsator.config.json'))
+
+fse.ensureDirSync(path.join(cwd, config.folder))
+
+async function run() {
+  function getComments(file) {
+    return new Promise((resolve, reject) => {
+      parse.file(file, (err, comments) => {
+        if (err) return reject(err)
+        resolve(comments)
+      })
+    })
+  }
+
+  const excludeFilter = through2.obj(function(item, enc, next) {
+    //Exclude the directories and non .js file
+    if (!item.stats.isDirectory() && path.extname(item.path) === '.js') {
+      this.push(item)
+    }
+    next()
+  })
+
+  const jsFiles = [] // files, directories, symlinks, etc
+  klaw(cwd)
+    .pipe(excludeFilter)
+    .on('data', item => jsFiles.push(item.path))
+    .on('end', async () => {
+      //jsFiles now equal to all the js files in the folder
+
+      config.tags.forEach((tag, index, tags) => {
+        tags[index].stream = fs.createWriteStream(
+          `${path.join(cwd, config.folder)}/${tag.file}`
+        )
+      })
+
+      let counter = 0
+      for (let jsFile of jsFiles) {
+        let comments = await getComments(jsFile)
+        for (let comment of comments) {
+          for (const tag of config.tags) {
+            let isFound = comment.tags.find(t => t.tag === tag.tag)
+            if (isFound) {
+              tag.stream.write(
+                `${counter>0?`\n`:``}${formater(
+                  {
+                    ...comment,
+                    file: jsFile.replace((config.replace === '__dirname' ? __dirname : config.replace), config.with)
+                  },
+                  tag.tag
+                )}`
+              )
+            }
+          }
+        }
+        counter++
+      }
+
+      for (const tag of config.tags) {
+        tag.stream.end()
+      }
+    })
+}
+
+run()
