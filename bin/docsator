@@ -31,7 +31,7 @@ async function run() {
     })
   }
 
-  const excludeFilter = through2.obj(function(item, enc, next) {
+  const excludeFilter = through2.obj(function (item, enc, next) {
     //Exclude the directories and non .js file
     if (!item.stats.isDirectory() && path.extname(item.path) === '.js') {
       this.push(item)
@@ -42,7 +42,7 @@ async function run() {
   const jsFiles = [] // files, directories, symlinks, etc
   klaw(cwd)
     .pipe(excludeFilter)
-    .on('data', item => jsFiles.push(item.path))
+    .on('data', (item) => jsFiles.push(item.path))
     .on('end', async () => {
       //jsFiles now equal to all the js files in the folder
 
@@ -57,13 +57,16 @@ async function run() {
         let comments = await getComments(jsFile)
         for (let comment of comments) {
           for (const tag of config.tags) {
-            let isFound = comment.tags.find(t => t.tag === tag.tag)
+            let isFound = comment.tags.find((t) => t.tag === tag.tag)
             if (isFound) {
               tag.stream.write(
-                `${counter>0?`\n`:``}${formater(
+                `${counter > 0 ? `\n` : ``}${formater(
                   {
                     ...comment,
-                    file: jsFile.replace((config.replace === '__dirname' ? __dirname : config.replace), config.with)
+                    file: jsFile.replace(
+                      config.replace === '__dirname' ? cwd : config.replace,
+                      config.with
+                    ),
                   },
                   tag.tag
                 )}`
