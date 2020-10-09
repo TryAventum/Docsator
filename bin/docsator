@@ -9,7 +9,7 @@ const program = require('commander')
 
 const { formater } = require('../helpers')
 
-program.version('1.0.0').description('Docs generator for Aventum!')
+program.version('1.0.1').description('Docs generator for Aventum!')
 
 program.option('-c, --cwd <arg1>', 'as if you run the command in this path')
 
